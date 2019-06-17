@@ -4,49 +4,68 @@ import xlrd
 import os
 import csv
 
+
+
 from MyMethods import *
 
 os.chdir('C:\\Users\\tom_s\\Desktop')
-df = pd.read_csv ('All_data.csv',header=0,encoding = 'unicode_escape')
+df = pd.read_csv ('All_data.csv',header=0,encoding = 'unicode_escape',sep=";")
+df2 = pd.read_csv ("Fifa_data.csv",header=0,sep=";")
 
-resultaten = open('All_data.csv','r')
-resultaten=csv.DictReader(resultaten)
-
-fifa_data = open("fifa_data.csv",'r',encoding="utf8")
-fifa_data = csv.DictReader(fifa_data)
+os.chdir('C:\\Users\\tom_s\\Desktop\\IPASS')
+df3 = pd.read_csv ("teamNameMerging.csv",header=0,sep=";")
 
 
-index = 0
-fifa_clubs = []
-for i in fifa_data:
-    if index>9999999999:
-        break
-    index+=1
-    if i["Club"] not in fifa_clubs:
-        fifa_clubs.append(i["Club"])
 
-print("\n")
+fifa_clubs=[]
+for i in df2["Club"]:
+    if i not in fifa_clubs:
+        fifa_clubs.append(i)
+print("aantal clubs in fifa_clubs",len(fifa_clubs))
 
-index=0
-hometeams=[]
-leages=[]
-for i in resultaten:
-    if index>9999999:
-        break
-    if [i['HomeTeam'],i['Div']] not in hometeams:
-        hometeams.append([i['HomeTeam'],i['Div']])
-    if i["Div"] not in leages:
-        leages.append(i["Div"])
-    index+=1
+wedstrijden_clubs=[]
+# for i in df3["res_club"]:
+#     if i not in wedstrijden_clubs:
+#         wedstrijden_clubs.append(i)
+# print("aantal clubs in All_data",len(wedstrijden_clubs))
+print(type(df3))
 
-print("teams wedstrijddata")
-printr(hometeams)
-print("......aantal teams......")
-print(len(hometeams))
-printr(leages)
-print("\n")
-print("\n\n\n")
-print("fifa clubs")
-printr(fifa_clubs)
-print("\n\n\n")
-
+#
+# nameMerge=[]
+# for i in wedstrijden_clubs:
+#     similarClub=""
+#     for j in fifa_clubs:
+#         try:
+#             if i in j or j in i:
+#                 nameMerge.append([i,j])
+#                 similarClub=j
+#         except Exception:
+#             pass
+#     # print(similarClub)
+#
+# print(nameMerge)
+#
+# for key in df:
+#     print(key)
+#
+# hometeams=[]
+# divisions=[]
+# index=0
+# for i in df["HomeTeam"]:
+#     if i not in hometeams:
+#         hometeams.append(i)
+#         divisions.append(df["Div"][index])
+#     index+=1
+#
+# print(len(hometeams))
+# print(hometeams)
+# print(divisions)
+# print(len(divisions))
+# for i in hometeams:
+#     print(i)
+# print("\n\n\n\n")
+# for i in divisions:
+#     print(i)
+# #
+# # for i in hometeams:
+# #     print(i)
