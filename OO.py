@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import math
 import unidecode
 from time import sleep
 from MyMethods import *
@@ -19,12 +20,16 @@ class Match:
   date = ""
   league = ""
 
-  def __init__(self, home_team,away_team,won,date,league):
-      self.home_team = home_team
-      self.away_team = away_team
+  def __init__(self, home_team_name,away_team_name,won,date,league):
+      self.home_team = home_team_name
+      self.away_team = away_team_name
       self.won = won
       self.date = date
       self.league = league
+
+  def updateTeams(self,home_team,away_team):
+      self.home_team=home_team
+      self.away_team=away_team
 
   def __str__(self):
       endstr=""
@@ -85,23 +90,22 @@ def createTeamAndMatchObjects():
             team_coll.append(AwayTeam)
         if match_list not in match_coll:
             match_coll.append(match_list)
-    match_coll=transformMatchList(match_coll)
-    # team_coll=transformTeamList(team_coll)
+    match_coll = transformMatchList(match_coll)
+    team_coll=transformTeamList(team_coll)
     return team_coll,match_coll
+
+#for each teamname in list team_coll, replace that element with object Team(teamname)
+def transformTeamList(team_coll):
+    for i in range(len(team_coll)):
+        team_coll[i]=Team(team_coll[i])
+    return team_coll
 
 #for each attribute in each element of match_list, replace element with object Match(att[0],att[1],att[2]...)
 def transformMatchList(match_coll):
     for i in range(len(match_coll)):
         att=match_coll[i]
-        match_coll[i]=Match(Team(att[0]),Team(att[1]),att[2],att[3],att[4])
+        match_coll[i]=Match(att[0],att[1],att[2],att[3],att[4])
     return match_coll
-
-# #for each teamname in list team_coll, replace that element with object Team(teamname)
-# def transformTeamList(team_coll):
-#     for i in range(len(team_coll)):
-#         team_coll[i]=Team(team_coll[i])
-#     return team_coll
-
 
 def createPlayerObjects(team_coll):
     player_coll=[]
@@ -123,82 +127,95 @@ def addPlayerToTeam(team_coll,team_name,player):
             team_coll[i] = team
     return team_coll
 
+def updateTeamsInMatch(match_coll,team_coll):
+    for i in match_coll:
+        hometeam=i.home_team
+        awayteam=i.away_team
+        for j in team_coll:
+            if j.name==hometeam:
+                hometeam=j
+            if j.name==awayteam:
+                awayteam=j
+        i.updateTeams(hometeam,awayteam)
+
 
 team_coll,match_coll=createTeamAndMatchObjects()
 player_coll=createPlayerObjects(team_coll)
-
-for i in match_coll:
-    hometeam=i.home_team
-    print(hometeam.__dict__)
+updateTeamsInMatch(match_coll,team_coll)
 
 
 
-# # Code linear regression
-# import os
-# import pandas as pd
-# import scipy
-# import math
+
+
+# Code linear regression
+
+
+
+
+# def seperate_data(fifa_data,train_factor=0.7):
+#     lengte_dataset=len(fifa_data["Nr"])
+#     train_size=int(train_factor*lengte_dataset)    #door int() kan er 1 observatie mis worden gelopen
+#     test_size=int((1-train_factor)*lengte_dataset)
 #
-# # Set the working directory and read all 6 years data files
+#     fifa_train=fifa_data.head(n=train_size)
+#     fifa_test=fifa_data.tail(n=test_size)
+#     return fifa_train,fifa_test
 #
-#
-#
-# # def seperate_data(fifa_data,train_factor=0.7):
-# #     lengte_dataset=len(fifa_data["Nr"])
-# #     train_size=int(train_factor*lengte_dataset)    #door int() kan er 1 observatie mis worden gelopen
-# #     test_size=int((1-train_factor)*lengte_dataset)
-# #
-# #     fifa_train=fifa_data.head(n=train_size)
-# #     fifa_test=fifa_data.tail(n=test_size)
-# #     return fifa_train,fifa_test
-# #
-# # fifa_train,fifa_test = seperate_data(fifa_data)
-#
-#
-#
-#
-#
-# # Function total_log_likelihood berekent eerst alle errors zelf en daarna de som
-# # van alle log_likelihoods van alle errors
-# def total_log_likelihood(coefficients):
-#     total_log_likelihood = 0
-#
-#     for match in match_coll:
-#         log_likelihood=0
-#         y = match.won
-#         homeTeam=match.home_team
-#         awayTeam=match.away_team
-#         x_1 = 0
-#         x_2 = 0
-#         for player in homeTeam.players:
-#             x_1 += player.overall
-#             x_2 += player.age
-#         for player in awayTeam.players:
-#             x_1 -= player.overall
-#             x_2 -= player.age
-#
-#         constante = coefficients[0]
-#         beta_1 = coefficients[1]
-#         beta_2 = coefficients[2]
-#         variance = coefficients[3]
-#
-#
-#         y_est = constante + beta_1 * x_1 + beta_2 * x_2
-#         error = y - y_est
-#         log_likelihood = calc_log_likelihood(error, variance)
-#         total_log_likelihood = total_log_likelihood + log_likelihood
-#         sleep(1)
-#
-#     return total_log_likelihood
+# fifa_train,fifa_test = seperate_data(fifa_data)
+
+
+
+
+
+# Function total_log_likelihood berekent eerst alle errors zelf en daarna de som
+# van alle log_likelihoods van alle errors
+def total_log_likelihood(coefficients):
+    total_log_likelihood = 0
+
+    for match in match_coll:
+        log_likelihood=0
+        y = match.won
+        homeTeam=match.home_team
+        awayTeam=match.away_team
+
+        #totale score van team home: overall,age
+        x_1_H = 0
+        x_2_H = 0
+
+        #tot score van team away
+        x_1_A = 0
+        x_2_A = 0
+        for player in homeTeam.players:
+            x_1_H += player.overall
+            x_2_H += player.age
+
+        for player in awayTeam.players:
+            x_1_A += player.overall
+            x_2_A += player.age
+
+
+        constante = coefficients[0]
+        beta_1 = coefficients[1]
+        beta_2 = coefficients[2]
+        variance = coefficients[3]
+
+
+        y_est = constante + beta_1 * (x_1_H - x_1_A) + beta_2 * (x_2_H - x_2_A)
+        error = y - y_est
+        log_likelihood = calc_log_likelihood(error, variance)
+        total_log_likelihood = total_log_likelihood + log_likelihood
+
+
+    return total_log_likelihood
 
 
 # Function log_likelihood berekent de kans van de normale verdeling dat je een
 # bepaalde error ziet van 1 observatie
-# def calc_log_likelihood(error, variance):
-#     return -(1 / 2) * math.log(2 * math.pi * (variance+0.000000001)) - (error ** 2) / (2 * (variance+0.00000001))
-#
-#
-# total_log_likelihood([0,0,0,0])
+def calc_log_likelihood(error, variance):
+    return -(1 / 2) * math.log(2 * math.pi * (variance+0.000000001)) - (error ** 2) / (2 * (variance+0.00000001))
+
+
+total_log_likelihood([0,0,0,0])
 
 # # Minimaliseer je total_log_likelihood (of maximaliseer de kans dat je de
 # # gegeven errors ziet) door je coefficients te veranderen en
