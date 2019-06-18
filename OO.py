@@ -1,6 +1,8 @@
 import os
 import pandas as pd
 import math
+from scipy import optimize
+import numpy as np
 import unidecode
 from time import sleep
 from MyMethods import *
@@ -129,6 +131,7 @@ def addPlayerToTeam(team_coll,team_name,player):
 
 def updateTeamsInMatch(match_coll,team_coll):
     for i in match_coll:
+
         hometeam=i.home_team
         awayteam=i.away_team
         for j in team_coll:
@@ -144,12 +147,32 @@ player_coll=createPlayerObjects(team_coll)
 updateTeamsInMatch(match_coll,team_coll)
 
 
+# for i in team_coll:
+#     print(i.__dict__)
+#     for j in i.players:
+#         overall=j.overall
+#         age=j.age
+#         print("  ",overall,age)
+
+
+print("\n\n")
+for i in team_coll:
+    if len(i.players)==0:
+        print(i.__dict__)
+
+
+
+
+
+
+
+
+
+
 
 
 
 # Code linear regression
-
-
 
 
 # def seperate_data(fifa_data,train_factor=0.7):
@@ -169,9 +192,9 @@ updateTeamsInMatch(match_coll,team_coll)
 
 # Function total_log_likelihood berekent eerst alle errors zelf en daarna de som
 # van alle log_likelihoods van alle errors
+
 def total_log_likelihood(coefficients):
     total_log_likelihood = 0
-
     for match in match_coll:
         log_likelihood=0
         y = match.won
@@ -202,8 +225,11 @@ def total_log_likelihood(coefficients):
 
         y_est = constante + beta_1 * (x_1_H - x_1_A) + beta_2 * (x_2_H - x_2_A)
         error = y - y_est
+        # printv("error:",error,"variance",variance,"log van..",2 * math.pi * (variance+0.000000001),"gedeeld door..",2 * (variance+0.00000001))
         log_likelihood = calc_log_likelihood(error, variance)
         total_log_likelihood = total_log_likelihood + log_likelihood
+    print("new model. "+ " total log likelihood="+str(total_log_likelihood)+ "  coefficients(constante,beta1,beta2,..)="+str(constante)+",  "+str(beta_1)+",  "+str(beta_2))
+
 
 
     return total_log_likelihood
@@ -212,18 +238,18 @@ def total_log_likelihood(coefficients):
 # Function log_likelihood berekent de kans van de normale verdeling dat je een
 # bepaalde error ziet van 1 observatie
 def calc_log_likelihood(error, variance):
-    return -(1 / 2) * math.log(2 * math.pi * (variance+0.000000001)) - (error ** 2) / (2 * (variance+0.00000001))
+    return - (1 / 2) * math.log(2 * math.pi * ((variance+0.000000001)**2) , math.e) - ((error**2)/(2*(variance+0.00000001)**2))
+    # return -(1 / 2) * math.log(2 * math.pi * (variance+0.000000001)) - (error ** 2) / (2 * (variance+0.00000001))
 
 
-total_log_likelihood([0,0,0,0])
 
 # # Minimaliseer je total_log_likelihood (of maximaliseer de kans dat je de
 # # gegeven errors ziet) door je coefficients te veranderen en
 # # sla de coefficients op die de laagste total_log_likelihood hebben
-# coefficient_initialization = [0, 0, 0, 0]
-# res = minimize(total_log_likelihood, coefficient_initialization, method='nelder-mead',
+# coefficient_initialization = [0,0,0,0]
+# res = optimize.minimize(total_log_likelihood, coefficient_initialization, method='nelder-mead',
 #                options={'xtol': 1e-8, 'disp': True})
-#
+
 # # Nu heb je je beste model
 #
 
