@@ -141,32 +141,16 @@ def updateTeamsInMatch(match_coll,team_coll):
                 awayteam=j
         i.updateTeams(hometeam,awayteam)
 
-#check collections
-def PrintTeamsWith0Players():
-    for i in team_coll:
-        if len(i.players)==0:
-            print(i.__dict__)
 
-def printTotalXvaluesTeams():
-    for i in team_coll:
-        print(i.__dict__)
-        overall = 0
-        age = 0
-        for j in i.players:
-            overall += j.overall
-            age += j.age
-        print(overall, age)
-
+team_coll=[]
+match_coll=[]
+player_coll=[]
 
 team_coll,match_coll=createTeamAndMatchObjects()
 player_coll=createPlayerObjects(team_coll)
 updateTeamsInMatch(match_coll,team_coll)
 
 
-
-for game in match_coll:
-    if len(game.away_team.players)==0:
-        print(game)
 
 
 
@@ -252,8 +236,7 @@ def calc_log_likelihood(error, variance):
 # # gegeven errors ziet) door je coefficients te veranderen en
 # # sla de coefficients op die de laagste total_log_likelihood hebben
 coefficient_initialization = [0,0,0,0]
-# res = optimize.minimize(total_log_likelihood, coefficient_initialization, method='nelder-mead',
-#                options={'xtol': 1e-8, 'disp': True})
+res = optimize.minimize(total_log_likelihood, coefficient_initialization, method='nelder-mead',options={'xtol': 1e-8, 'disp': True})
 
 # # Nu heb je je beste model
 #
