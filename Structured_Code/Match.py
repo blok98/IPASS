@@ -15,3 +15,13 @@ class Match:
   def updateTeams(self,home_team,away_team):
       self.home_team=home_team
       self.away_team=away_team
+
+  def __str__(self):
+      endstr=""
+      if self.won==1:
+          endstr=str(self.home_team)+ " won the game."
+      elif self.won==0:
+          endstr=str(self.away_team)+ " won the game."
+      elif self.won==0.5:
+          endstr="The game ended in a draw."
+      return "The match between "+str(self.home_team)+" and "+str(self.away_team)+" that was being played on "+str(self.date)+". "+endstr

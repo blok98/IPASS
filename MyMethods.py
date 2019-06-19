@@ -16,14 +16,15 @@ def printm(matrix):     #print matrixes in numpy format
             print(matrix)
     print("")
 
-def printv(a="", b="", c="", d="", e="", f="", g="", h="", i="", j=""):     #kan meer dan 2 dingen printen
-    print("info: ")
+def printv(a="", b="", c="", d="", e="", f="", g="", h="", i="", j="", k="", l="", m="", n=""):     #kan meer dan 2 dingen printen
     print(a, b, end=" ")
     print(c, d, end=" ")
     print(e, f, end=" ")
     print(g, h, end=" ")
     print(i, j, end=" ")
-    print("")
+    print(k, l, end=" ")
+    print(m, n, end="\n")
+
 
 
 def printr(data,layers=1,index=None,limiter=25,):            #print elk element uit een for loop

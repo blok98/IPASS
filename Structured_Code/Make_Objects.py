@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+from MyMethods import *
 
 from Structured_Code import Match,Team,Player
 
@@ -51,7 +52,9 @@ def createPlayerObjects(team_coll):
         team_name=fifa_data["Club"][i]
         age=fifa_data["Age"][i]
         overall=fifa_data["Overall"][i]
-        player=Player.Player(name,team_name,age,overall)
+        position=fifa_data["Position"][i]
+        position=definePosition(position)
+        player=Player.Player(name,team_name,age,overall,position)
         player_coll.append(player)
         team_coll=addPlayerToTeam(team_coll,team_name,player)
     return player_coll
@@ -75,3 +78,20 @@ def updateTeamsInMatch(match_coll,team_coll):
             if j.name==awayteam:
                 awayteam=j
         i.updateTeams(hometeam,awayteam)
+
+def definePosition(position):
+    attacker_positions = "ST", "RS", "LS", "RF", "LW", "RW", "LF", "RF", "CF"
+    midfield_positions = "RCM", "LCM", "LDM", "RDM", "CAM", "CDM", "RM", "LM", "LAM", "RAM", "CM"
+    defending_positions = "RCB", "LCB", "CB", "RB", "LB","LWB","RWB"
+    goalkeeper_positions = "GK"
+    position=str(position)
+    if position in attacker_positions:
+        position = "attacker"
+    elif position in midfield_positions:
+        position = "midfielder"
+    elif position in defending_positions:
+        position = "defender"
+    elif position in goalkeeper_positions:
+        position = "goalkeeper"
+
+    return position
