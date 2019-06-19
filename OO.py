@@ -10,7 +10,7 @@ from MyMethods import *
 
 os.chdir('C:\\Users\\tom_s\\Desktop')  # Set wd
 df1 = pd.read_csv("All_data.csv", index_col=False, encoding="unicode_escape", sep=";")
-df2 = pd.read_csv("Fifa_data.csv", index_col=False, encoding="unicode_escape", sep=";")
+df2 = pd.read_csv("Fifa_data.csv", index_col=False, encoding="utf-8", sep=";")
 match_data = df1  # Save a copy
 fifa_data = df2
 
@@ -141,30 +141,32 @@ def updateTeamsInMatch(match_coll,team_coll):
                 awayteam=j
         i.updateTeams(hometeam,awayteam)
 
+#check collections
+def PrintTeamsWith0Players():
+    for i in team_coll:
+        if len(i.players)==0:
+            print(i.__dict__)
+
+def printTotalXvaluesTeams():
+    for i in team_coll:
+        print(i.__dict__)
+        overall = 0
+        age = 0
+        for j in i.players:
+            overall += j.overall
+            age += j.age
+        print(overall, age)
+
 
 team_coll,match_coll=createTeamAndMatchObjects()
 player_coll=createPlayerObjects(team_coll)
 updateTeamsInMatch(match_coll,team_coll)
 
 
-# for i in team_coll:
-#     print(i.__dict__)
-#     for j in i.players:
-#         overall=j.overall
-#         age=j.age
-#         print("  ",overall,age)
 
-
-print("\n\n")
-for i in team_coll:
-    if len(i.players)==0:
-        print(i.__dict__)
-
-
-
-
-
-
+for game in match_coll:
+    if len(game.away_team.players)==0:
+        print(game)
 
 
 
@@ -216,6 +218,9 @@ def total_log_likelihood(coefficients):
             x_1_A += player.overall
             x_2_A += player.age
 
+        #skip matches without teamplayers (cause=not matching teamnames)
+        if x_1_H==0 or x_1_A==0:
+            continue
 
         constante = coefficients[0]
         beta_1 = coefficients[1]
@@ -228,8 +233,8 @@ def total_log_likelihood(coefficients):
         # printv("error:",error,"variance",variance,"log van..",2 * math.pi * (variance+0.000000001),"gedeeld door..",2 * (variance+0.00000001))
         log_likelihood = calc_log_likelihood(error, variance)
         total_log_likelihood = total_log_likelihood + log_likelihood
-    print("new model. "+ " total log likelihood="+str(total_log_likelihood)+ "  coefficients(constante,beta1,beta2,..)="+str(constante)+",  "+str(beta_1)+",  "+str(beta_2))
-
+    print("new model. "+" y_est="+str(y_est)+", y="+str(y)+ "  total log likelihood="+str(total_log_likelihood)+ "  coefficients(constante,beta1,beta2,..)="+str(constante)+",  "+str(beta_1)+",  "+str(beta_2))
+    print("    variables:(x1h/x2h)="+str(x_1_H)+", "+str(x_2_H)+"   variables:(x1a/x2a)"+str(x_1_A)+", "+str(x_2_A))
 
 
     return total_log_likelihood
@@ -246,7 +251,7 @@ def calc_log_likelihood(error, variance):
 # # Minimaliseer je total_log_likelihood (of maximaliseer de kans dat je de
 # # gegeven errors ziet) door je coefficients te veranderen en
 # # sla de coefficients op die de laagste total_log_likelihood hebben
-# coefficient_initialization = [0,0,0,0]
+coefficient_initialization = [0,0,0,0]
 # res = optimize.minimize(total_log_likelihood, coefficient_initialization, method='nelder-mead',
 #                options={'xtol': 1e-8, 'disp': True})
 
