@@ -1,5 +1,6 @@
 import math
 from scipy import optimize
+from Structured_Code.ClientLineInterface import *
 from MyMethods import *
 
 
@@ -41,8 +42,8 @@ def total_log_likelihood(coefficients,match_coll):
         log_likelihood = calc_log_likelihood(error, variance)
         total_log_likelihood = total_log_likelihood + log_likelihood
         game=match
-    print("new model. "+" y_est="+str(y_est)+", y="+str(y)+ "  total log likelihood="+str(total_log_likelihood)+ "  coefficients(constante,beta1,beta2,..)=",coefficients)
-    printv("    hometeam: ",homeTeamVariables,"  awayteam: ",awayTeamVariables)
+
+    print_proces(y_est,y,total_log_likelihood,coefficients,homeTeamVariables,awayTeamVariables)
 
     return -1*total_log_likelihood
 
