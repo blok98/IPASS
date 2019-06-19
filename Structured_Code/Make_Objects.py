@@ -59,6 +59,7 @@ def createPlayerObjects(team_coll):
         team_coll=addPlayerToTeam(team_coll,team_name,player)
     return player_coll
 
+#first check if team excist in team_coll (and thus also in match_data), than add players to that team.
 def addPlayerToTeam(team_coll,team_name,player):
     for i in range(len(team_coll)):
         team = team_coll[i]
@@ -67,6 +68,8 @@ def addPlayerToTeam(team_coll,team_name,player):
             team_coll[i] = team
     return team_coll
 
+# convert hometeams and awayteams from match_coll from the type string to the type Team.
+# ... teams that are not present in match_coll will keep their string type
 def updateTeamsInMatch(match_coll,team_coll):
     for i in match_coll:
 

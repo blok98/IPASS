@@ -28,6 +28,7 @@ def printv(a="", b="", c="", d="", e="", f="", g="", h="", i="", j="", k="", l="
 
 
 def printr(data,layers=1,index=None,limiter=25,):            #print elk element uit een for loop
+    amount=0
     if layers <= 0:
         return True
     if limiter <=0:
@@ -36,11 +37,15 @@ def printr(data,layers=1,index=None,limiter=25,):            #print elk element 
         if index != None:
             try:
                 print(i[index])
+                amount+=1
             except Exception as e:
                 print(e)
+                amount+=1
         else:
             print(i)
+            amount+=1
         printr(i, layers - 1, index, limiter-1)
+    print(amount,"resultaten")
 
 def printt(value):
     print("type("+str(value)+")="+str(type(value)))

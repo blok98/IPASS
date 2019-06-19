@@ -3,6 +3,25 @@ from scipy import optimize
 from Structured_Code.ClientLineInterface import *
 from MyMethods import *
 
+def create_variables(homeTeam,awayTeam):
+    # avg score van team home: overall,age
+    x1 = homeTeam.get_avg_age()
+    x2 = homeTeam.get_overall_positions()["attacker"]
+    x3 = homeTeam.get_overall_positions()["midfielder"]
+    x4 = homeTeam.get_overall_positions()["defender"]
+    x5 = homeTeam.get_overall_positions()["goalkeeper"]
+    homeTeamVariables = [x1, x2, x3, x4, x5]
+
+    # tot score van team away
+    x1 = awayTeam.get_avg_age()
+    x2 = awayTeam.get_overall_positions()["attacker"]
+    x3 = awayTeam.get_overall_positions()["midfielder"]
+    x4 = awayTeam.get_overall_positions()["defender"]
+    x5 = awayTeam.get_overall_positions()["goalkeeper"]
+    awayTeamVariables = [x1, x2, x3, x4, x5]
+
+    return homeTeamVariables,awayTeamVariables
+
 
 # Function total_log_likelihood berekent eerst alle errors zelf en daarna de som
 # van alle log_likelihoods van alle errors
@@ -13,23 +32,7 @@ def total_log_likelihood(coefficients,match_coll):
         y = match.won
         homeTeam=match.home_team
         awayTeam=match.away_team
-
-        #avg score van team home: overall,age
-        x1 = homeTeam.get_avg_age()
-        x2 = homeTeam.get_overall_positions()["attacker"]
-        x3 = homeTeam.get_overall_positions()["midfielder"]
-        x4 = homeTeam.get_overall_positions()["defender"]
-        x5 = homeTeam.get_overall_positions()["goalkeeper"]
-        homeTeamVariables=[x1,x2,x3,x4,x5]
-
-        #tot score van team away
-        x1 = awayTeam.get_avg_age()
-        x2 = awayTeam.get_overall_positions()["attacker"]
-        x3 = awayTeam.get_overall_positions()["midfielder"]
-        x4 = awayTeam.get_overall_positions()["defender"]
-        x5 = awayTeam.get_overall_positions()["goalkeeper"]
-        awayTeamVariables=[x1,x2,x3,x4,x5]
-
+        homeTeamVariables,awayTeamVariables=create_variables(homeTeam,awayTeam)
         constante = coefficients[0]
         variance = coefficients[-1]
 
@@ -41,11 +44,10 @@ def total_log_likelihood(coefficients,match_coll):
         error = y - y_est
         log_likelihood = calc_log_likelihood(error, variance)
         total_log_likelihood = total_log_likelihood + log_likelihood
-        game=match
 
     print_proces(y_est,y,total_log_likelihood,coefficients,homeTeamVariables,awayTeamVariables)
 
-    return -1*total_log_likelihood
+    return total_log_likelihood
 
 
 # Function log_likelihood berekent de kans van de normale verdeling dat je een
@@ -61,7 +63,7 @@ def calc_log_likelihood(error, variance):
 def minimize(matches,coefficient_initialization=[0,0,0,0,0,0,0],method='nelder-mead'):
     model = optimize.minimize(total_log_likelihood, coefficient_initialization, args=(matches), method=method,
                options={'xtol': 1e-8, 'disp': True})
-    return model
+    return coefficient_initialization
 
 
 
@@ -69,25 +71,29 @@ def minimize(matches,coefficient_initialization=[0,0,0,0,0,0,0],method='nelder-m
 
 
 
-# # Nu heb je je beste model
-#
+# Nu heb je je beste model
 
-# # Nu gaan we waardes voorspellen van test_data
-# y = test_data[0]
-# x_1 = test_data[1]
-# x_2 = test_data[2]
-#
-# constante = estimated_coefficients[0]
-# beta_1 = estimated_coefficients[1]
-# beta_2 = estimated_coefficients[2]
-# variance = estimated_coefficients[3]
-#
-# for i in range(len(df[0])):
-#     y_est = constante + beta_1 * x_1[i] + beta_2 * x_2[i]
-#     error_winst = math.abs(y_est - 1)
-#     error_verlies = math.abs(y_est - 0)
-#     log_likelihood_winst = log_likelihood(error_winst, variance)
-#     log_likelihood_verlies = log_likelihood(error_verlies, variance)
-#
-#     kans_dat_je_wint_x_maal_groter = log_likelihood_winst / log_likelihood_verlies
-#
+
+# Nu gaan we waardes voorspellen van test_data
+def test_model(coefficients,match_coll):
+
+    for match in match_coll:
+        y = match.won
+        homeTeam = match.home_team
+        awayTeam = match.away_team
+        homeTeamVariables,awayTeamVariables=create_variables(homeTeam,awayTeam)
+        constante = coefficients[0]
+        variance = coefficients[-1]
+
+        y_est = constante
+        for i in range(1, len(coefficients) - 1):
+            y_est += (coefficients[i] * (homeTeamVariables[i - 1] - awayTeamVariables[i - 1]))
+
+        # nu bereken je de kans dat de error van verliezen voorkomt, en de kans dat de error van winnen voorkomt (gegeven een distribution)
+        error_winst = math.fabs(y_est - 1)
+        error_verlies = math.fabs(y_est - 0)
+        log_likelihood_winst = calc_log_likelihood(error_winst, variance)
+        log_likelihood_verlies = calc_log_likelihood(error_verlies, variance)
+
+        kans_dat_je_wint_x_maal_groter = log_likelihood_winst / log_likelihood_verlies
+        printv("ht:",homeTeam,"at",awayTeam,"y:",y,"y_est",y_est,"grotere kans op winnen:",kans_dat_je_wint_x_maal_groter)
