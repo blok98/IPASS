@@ -1,6 +1,7 @@
 import pandas as pd
 import Calculations
 import Match,Team,Player
+import datetime
 
 df1 = pd.read_csv("All_data.csv", index_col=False, encoding="unicode_escape", sep=";")
 df2 = pd.read_csv("Fifa_data.csv", index_col=False, encoding="utf-8", sep=";")
@@ -13,13 +14,14 @@ def createTeamAndMatchObjects():
     for i in match_data["Nr"]:
         HomeTeam=match_data["HomeTeam_decoded"][i]
         AwayTeam=match_data["AwayTeam_decoded"][i]
-        oddsHomeTeam=match_data["BWH"][i]
         won=int(match_data["FTHG"][i]>match_data["FTAG"][i])
         if match_data["FTHG"][i]==match_data["FTAG"][i]:
             won=0.5
         date=match_data["Date"][i]
+        date=datetime.datetime.strptime(date, "%d-%m-%Y")
         league = match_data["Div"][i]
-        match_list=[HomeTeam,AwayTeam,won,date,league,oddsHomeTeam]
+        oddsHomeTeam=match_data["BWH"][i]
+        match_list=[HomeTeam,AwayTeam,won,date,league,oddsHomeTeam,"None","None"]
         if HomeTeam not in team_coll:
             team_coll.append(HomeTeam)
         if AwayTeam not in team_coll:
@@ -40,8 +42,10 @@ def transformTeamList(team_coll):
 def transformMatchList(match_coll):
     for i in range(len(match_coll)):
         att=match_coll[i]
-        match_coll[i]=Match.Match(att[0],att[1],att[2],att[3],att[4],att[5])
+        match_coll[i]=Match.Match(att[0],att[1],att[2],att[3],att[4],att[5],att[6],att[7])
     return match_coll
+
+
 
 def createPlayerObjects(team_coll):
     player_coll=[]
