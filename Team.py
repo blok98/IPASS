@@ -9,6 +9,12 @@ class Team:
     def add_player(self, player):
         self.players.append(player)
 
+    def get_avg_age(self):
+        avg=0
+        for player in self.players:
+            avg+=player.age
+        avg=avg//len(self.players)
+        return avg
 
     def get_avg_overall(self):
         avg=0
@@ -17,14 +23,27 @@ class Team:
         avg=avg//len(self.players)
         return avg
 
-    def get_avg_age(self):
+    def get_avg_height(self):
         avg=0
+        players_without_stats=0
         for player in self.players:
-            avg+=player.age
-        avg=avg//len(self.players)
-        return avg
+            avg += player.height
+            if player.height==0.0:
+                players_without_stats+=1
+        avg = avg / (len(self.players)-players_without_stats)
+        return round(avg,2)
 
-    def get_overall_positions(self):
+    def get_avg_weight(self):
+        avg=0
+        players_without_stats=0
+        for player in self.players:
+            avg += player.weight
+            if player.weight==0.0:
+                players_without_stats+=1
+        avg = avg / (len(self.players)-players_without_stats)
+        return round(avg,2)
+
+    def get_avg_positionRating(self):
         overalls={"attacker":[],"midfielder":[],"defender":[],"goalkeeper":[]}
         for player in self.players:
             if player.position=="attacker":
@@ -35,10 +54,8 @@ class Team:
                 overalls[player.position].append(player.overall)
             elif player.position=="goalkeeper":
                 overalls[player.position].append(player.overall)
-
         for pos in overalls:
             overalls[pos]=sum(overalls[pos])//len(overalls[pos])
-
         return overalls
 
     def __str__(self):

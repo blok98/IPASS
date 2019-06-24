@@ -1,10 +1,7 @@
 import pandas as pd
-import os
-from MyMethods import *
+import Calculations
+import Match,Team,Player
 
-from Structured_Code import Match,Team,Player
-
-os.chdir('C:\\Users\\tom_s\\Desktop')  # Set wd
 df1 = pd.read_csv("All_data.csv", index_col=False, encoding="unicode_escape", sep=";")
 df2 = pd.read_csv("Fifa_data.csv", index_col=False, encoding="utf-8", sep=";")
 match_data = df1  # Save a copy
@@ -16,12 +13,13 @@ def createTeamAndMatchObjects():
     for i in match_data["Nr"]:
         HomeTeam=match_data["HomeTeam_decoded"][i]
         AwayTeam=match_data["AwayTeam_decoded"][i]
+        oddsHomeTeam=match_data["BWH"][i]
         won=int(match_data["FTHG"][i]>match_data["FTAG"][i])
         if match_data["FTHG"][i]==match_data["FTAG"][i]:
             won=0.5
         date=match_data["Date"][i]
         league = match_data["Div"][i]
-        match_list=[HomeTeam,AwayTeam,won,date,league]
+        match_list=[HomeTeam,AwayTeam,won,date,league,oddsHomeTeam]
         if HomeTeam not in team_coll:
             team_coll.append(HomeTeam)
         if AwayTeam not in team_coll:
@@ -42,7 +40,7 @@ def transformTeamList(team_coll):
 def transformMatchList(match_coll):
     for i in range(len(match_coll)):
         att=match_coll[i]
-        match_coll[i]=Match.Match(att[0],att[1],att[2],att[3],att[4])
+        match_coll[i]=Match.Match(att[0],att[1],att[2],att[3],att[4],att[5])
     return match_coll
 
 def createPlayerObjects(team_coll):
@@ -51,10 +49,12 @@ def createPlayerObjects(team_coll):
         name=fifa_data["Name"][i]
         team_name=fifa_data["Club"][i]
         age=fifa_data["Age"][i]
+        height=Calculations.convertHeightToCM(fifa_data["Height"][i])
+        weight=Calculations.convertWeightToKG(fifa_data["Weight"][i])
         overall=fifa_data["Overall"][i]
         position=fifa_data["Position"][i]
         position=definePosition(position)
-        player=Player.Player(name,team_name,age,overall,position)
+        player=Player.Player(name,team_name,age,height,weight,overall,position)
         player_coll.append(player)
         team_coll=addPlayerToTeam(team_coll,team_name,player)
     return player_coll
