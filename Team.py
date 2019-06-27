@@ -1,6 +1,7 @@
 class Team:
     name = "None"
     players = []
+    matchDates=[]
 
     def __init__(self, name,):
         self.name = str(name)
@@ -8,6 +9,14 @@ class Team:
 
     def add_player(self, player):
         self.players.append(player)
+
+    def set_match_dates(self,list_dates):
+        list_dates.sort()
+        self.matchDates=list_dates
+
+    def get_last_played_game(self,date):
+        dateLastPlayed=self.matchDates[self.matchDates.index(date)-1]
+        return dateLastPlayed
 
     def get_avg_age(self):
         avg=0

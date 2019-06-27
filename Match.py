@@ -5,26 +5,19 @@ class Match:
   date = ""
   league = ""
   oddsHomeTeam=1
-  lastGameHomeTeam = "None"
-  lastGameAwayTeam = "None"
 
-  def __init__(self, home_team_name,away_team_name,won,date,league,oddsHomeTeam,lastGameHomeTeam,lastGameAwayTeam):
+
+  def __init__(self, home_team_name,away_team_name,won,date,league,oddsHomeTeam):
       self.home_team = home_team_name
       self.away_team = away_team_name
       self.won = won
       self.date = date
       self.league = league
       self.oddsHomeTeam = oddsHomeTeam
-      self.lastGameHomeTeam = lastGameHomeTeam
-      self.lastGameAwayTeam = lastGameAwayTeam
 
   def updateTeams(self,home_team,away_team):
       self.home_team=home_team
       self.away_team=away_team
-
-  def updateLastGames(self,lastGameHomeTeam,lastGameAwayTeam):
-      self.lastGameHomeTeam=lastGameHomeTeam
-      self.lastGameHomeTeam=lastGameHomeTeam
 
   def __str__(self):
       endstr=""

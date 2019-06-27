@@ -1,8 +1,9 @@
 import math
+import datetime
 from scipy import optimize
 
 
-def create_variables(homeTeam, awayTeam):
+def create_variables(homeTeam, awayTeam, match):
     # avg score van team home: overall,age
     x1 = homeTeam.get_avg_age()
     x2 = homeTeam.get_avg_height()
@@ -11,7 +12,8 @@ def create_variables(homeTeam, awayTeam):
     x5 = homeTeam.get_avg_positionRating()["midfielder"]
     x6 = homeTeam.get_avg_positionRating()["defender"]
     x7 = homeTeam.get_avg_positionRating()["goalkeeper"]
-    homeTeamVariables = [x1, x2, x3, x4, x5, x6, x7]
+    x8 = (match.date-homeTeam.get_last_played_game(match.date)).days
+    homeTeamVariables = [x1, x2, x3, x4, x5, x6, x7, x8]
     # tot score van team away
     x1 = awayTeam.get_avg_age()
     x2 = awayTeam.get_avg_height()
@@ -20,7 +22,9 @@ def create_variables(homeTeam, awayTeam):
     x5 = awayTeam.get_avg_positionRating()["midfielder"]
     x6 = awayTeam.get_avg_positionRating()["defender"]
     x7 = awayTeam.get_avg_positionRating()["goalkeeper"]
-    awayTeamVariables = [x1, x2, x3, x4, x5, x6, x7]
+    x8 = (match.date-awayTeam.get_last_played_game(match.date)).days
+    awayTeamVariables = [x1, x2, x3, x4, x5, x6, x7, x8]
+
 
     return homeTeamVariables, awayTeamVariables
 
@@ -45,7 +49,7 @@ def total_log_likelihood(coefficients, match_coll):
         y = match.won
         homeTeam = match.home_team
         awayTeam = match.away_team
-        homeTeamVariables, awayTeamVariables = create_variables(homeTeam, awayTeam)
+        homeTeamVariables, awayTeamVariables = create_variables(homeTeam, awayTeam, match)
 
         variance = coefficients[-1]
         # y_est = constante + beta_1 * (x_1_H - x_1_A) + beta_2 * (x_2_H - x_2_A) + beta_3 * (x_3_H - x_3_A)
@@ -79,7 +83,7 @@ def calc_log_likelihood(error, variance):
 # # Minimaliseer je total_log_likelihood (of maximaliseer de kans dat je de
 # # gegeven errors ziet) door je coefficients te veranderen en
 # # sla de coefficients op die de laagste total_log_likelihood hebben
-def minimize(matches, coefficient_initialization=[0, 0, 0, 0, 0, 0, 0, 0, 0], method='Nelder-Mead', bnds=[],
+def minimize(matches, coefficient_initialization=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0], method='Nelder-Mead', bnds=[],
              options={'gtol': 1e-3, 'eps': 100, 'disp': True}):
     print("bboouunnddss",bnds)
     model = optimize.minimize(total_log_likelihood, coefficient_initialization, args=(matches), method=method,
@@ -96,7 +100,7 @@ def test_model(coefficients, match_coll):
         y = match.won
         homeTeam = match.home_team
         awayTeam = match.away_team
-        homeTeamVariables, awayTeamVariables = create_variables(homeTeam, awayTeam)
+        homeTeamVariables, awayTeamVariables = create_variables(homeTeam, awayTeam, match)
         constante = coefficients[0]
         variance = coefficients[-1]
 
@@ -120,7 +124,7 @@ def get_winning_odds(coefficients, match_coll):
     for match in match_coll:
         homeTeam = match.home_team
         awayTeam = match.away_team
-        homeTeamVariables, awayTeamVariables = create_variables(homeTeam, awayTeam)
+        homeTeamVariables, awayTeamVariables = create_variables(homeTeam, awayTeam, match)
         constante = coefficients[0]
         variance = coefficients[-1]
 
@@ -140,13 +144,14 @@ def get_winning_odds(coefficients, match_coll):
     return all_odds
 
 
+#berekenen hoeveel procent van de observaties het model het tegenovergestelde voorspelt  (winnen inplaats van verlizen)
 def total_error(coefficients, match_test):
     tot_error = 0
     for match in match_test:
         y = match.won
         homeTeam = match.home_team
         awayTeam = match.away_team
-        homeTeamVariables, awayTeamVariables = create_variables(homeTeam, awayTeam)
+        homeTeamVariables, awayTeamVariables = create_variables(homeTeam, awayTeam, match)
         y_est = calc_estimated_value(coefficients, homeTeamVariables, awayTeamVariables)
         if y_est > 0.5:
             y_est = 1

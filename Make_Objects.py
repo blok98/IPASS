@@ -9,7 +9,7 @@ match_data = df1  # Save a copy
 fifa_data = df2
 
 def createTeamAndMatchObjects():
-    team_coll = []
+    team_coll = {}
     match_coll = []
     for i in match_data["Nr"]:
         HomeTeam=match_data["HomeTeam_decoded"][i]
@@ -21,11 +21,16 @@ def createTeamAndMatchObjects():
         date=datetime.datetime.strptime(date, "%d-%m-%Y")
         league = match_data["Div"][i]
         oddsHomeTeam=match_data["BWH"][i]
-        match_list=[HomeTeam,AwayTeam,won,date,league,oddsHomeTeam,"None","None"]
+        match_list=[HomeTeam,AwayTeam,won,date,league,oddsHomeTeam]
         if HomeTeam not in team_coll:
-            team_coll.append(HomeTeam)
+            team_coll[HomeTeam]=[date]
+        else:
+            team_coll[HomeTeam].append(date)
         if AwayTeam not in team_coll:
-            team_coll.append(AwayTeam)
+            team_coll[AwayTeam]=[date]
+        else:
+            team_coll[AwayTeam].append(date)
+
         if match_list not in match_coll:
             match_coll.append(match_list)
     match_coll = transformMatchList(match_coll)
@@ -33,16 +38,20 @@ def createTeamAndMatchObjects():
     return team_coll,match_coll
 
 #for each teamname in list team_coll, replace that element with object Team(teamname)
-def transformTeamList(team_coll):
-    for i in range(len(team_coll)):
-        team_coll[i]=Team.Team(team_coll[i])
+def transformTeamList(team_dict):
+    team_coll=[]
+    for i in team_dict:
+        dates=team_dict[i]
+        team=Team.Team(i)
+        team.set_match_dates(dates)
+        team_coll.append(team)
     return team_coll
 
 #for each attribute in each element of match_list, replace element with object Match(att[0],att[1],att[2]...)
 def transformMatchList(match_coll):
     for i in range(len(match_coll)):
         att=match_coll[i]
-        match_coll[i]=Match.Match(att[0],att[1],att[2],att[3],att[4],att[5],att[6],att[7])
+        match_coll[i]=Match.Match(att[0],att[1],att[2],att[3],att[4],att[5])
     return match_coll
 
 
