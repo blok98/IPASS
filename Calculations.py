@@ -1,3 +1,5 @@
+from random import sample
+
 def convertHeightToCM(height_in_feet_and_inches):
     if str(height_in_feet_and_inches)=="nan":
         return 0.00
@@ -11,3 +13,8 @@ def convertWeightToKG(weight_in_lbs):
     weight=str(weight_in_lbs).split("l")
     weight_in_kg=int(weight[0])*0.45359237
     return round(weight_in_kg,2)
+
+def seperateData(match_coll,train=0.7,test=0.3):
+    match_train=sample(match_coll, int(0.7*len(match_coll)))
+    match_test=[match for match in match_coll if match not in match_train]
+    return match_train,match_test

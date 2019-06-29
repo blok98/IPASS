@@ -1,7 +1,7 @@
 import math
 import datetime
 from scipy import optimize
-import pickle
+import Saved_Data
 
 # avg score van team home: overall,age
 def create_variables(homeTeam, awayTeam, match):
@@ -89,8 +89,7 @@ def minimize(matches, coefficient_initialization=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     model = optimize.minimize(total_log_likelihood, coefficient_initialization, args=(matches), method=method,
                               bounds=bnds, options=options)
     # save model in text file
-    with open("train.pickle", "wb") as f:
-        pickle.dump(model, f)
+    Saved_Data.save_model(model)
     return model
 
 
