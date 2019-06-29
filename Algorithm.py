@@ -3,8 +3,8 @@ import datetime
 from scipy import optimize
 
 
+# avg score van team home: overall,age
 def create_variables(homeTeam, awayTeam, match):
-    # avg score van team home: overall,age
     x1 = homeTeam.get_avg_age()
     x2 = homeTeam.get_avg_height()
     x3 = homeTeam.get_avg_weight()
@@ -14,7 +14,6 @@ def create_variables(homeTeam, awayTeam, match):
     x7 = homeTeam.get_avg_positionRating()["goalkeeper"]
     x8 = (match.date-homeTeam.get_last_played_game(match.date)).days
     homeTeamVariables = [x1, x2, x3, x4, x5, x6, x7, x8]
-    # tot score van team away
     x1 = awayTeam.get_avg_age()
     x2 = awayTeam.get_avg_height()
     x3 = awayTeam.get_avg_weight()
