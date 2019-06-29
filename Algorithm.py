@@ -1,10 +1,11 @@
 import math
 import datetime
 from scipy import optimize
-
+import pickle
 
 # avg score van team home: overall,age
 def create_variables(homeTeam, awayTeam, match):
+    ''' this creates the variables'''
     x1 = homeTeam.get_avg_age()
     x2 = homeTeam.get_avg_height()
     x3 = homeTeam.get_avg_weight()
@@ -87,78 +88,13 @@ def minimize(matches, coefficient_initialization=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     print("bboouunnddss",bnds)
     model = optimize.minimize(total_log_likelihood, coefficient_initialization, args=(matches), method=method,
                               bounds=bnds, options=options)
+    # save model in text file
+    with open("train.pickle", "wb") as f:
+        pickle.dump(model, f)
     return model
 
 
-# Nu heb je je beste model
 
 
-# Nu gaan we waardes voorspellen van test_data
-def test_model(coefficients, match_coll):
-    for match in match_coll:
-        y = match.won
-        homeTeam = match.home_team
-        awayTeam = match.away_team
-        homeTeamVariables, awayTeamVariables = create_variables(homeTeam, awayTeam, match)
-        constante = coefficients[0]
-        variance = coefficients[-1]
 
-        y_est = constante
-        for i in range(1, len(coefficients) - 1):
-            y_est += (coefficients[i] * (homeTeamVariables[i - 1] - awayTeamVariables[i - 1]))
-
-        # nu bereken je de kans dat de error van verliezen voorkomt, en de kans dat de error van winnen voorkomt (gegeven een distribution)
-        error_winst = math.fabs(y_est - 1)
-        error_verlies = math.fabs(y_est - 0)
-        log_likelihood_winst = calc_log_likelihood(error_winst, variance)
-        log_likelihood_verlies = calc_log_likelihood(error_verlies, variance)
-
-        kans_dat_je_wint_x_maal_groter = math.e ** (log_likelihood_winst) / math.e ** (log_likelihood_verlies)
-        # printv("ht:", homeTeam, "at", awayTeam, "y:", y, "y_est", y_est, "grotere kans op winnen:",
-        #        kans_dat_je_wint_x_maal_groter)
-
-
-def get_winning_odds(coefficients, match_coll):
-    all_odds = []
-    for match in match_coll:
-        homeTeam = match.home_team
-        awayTeam = match.away_team
-        homeTeamVariables, awayTeamVariables = create_variables(homeTeam, awayTeam, match)
-        constante = coefficients[0]
-        variance = coefficients[-1]
-
-        y_est = constante
-        for i in range(1, len(coefficients) - 1):
-            y_est += (coefficients[i] * (homeTeamVariables[i - 1] - awayTeamVariables[i - 1]))
-
-        # nu bereken je de kans dat de error van verliezen voorkomt, en de kans dat de error van winnen voorkomt (gegeven een distribution)
-        error_winst = math.fabs(y_est - 1)
-        error_verlies = math.fabs(y_est - 0)
-        log_likelihood_winst = calc_log_likelihood(error_winst, variance)
-        log_likelihood_verlies = calc_log_likelihood(error_verlies, variance)
-        likelihood_winst = math.e ** (log_likelihood_winst)
-        likelihood_verlies = math.e ** (log_likelihood_verlies)
-
-        all_odds.append(likelihood_winst / likelihood_verlies)
-    return all_odds
-
-
-#berekenen hoeveel procent van de observaties het model het tegenovergestelde voorspelt  (winnen inplaats van verlizen)
-def total_error(coefficients, match_test):
-    tot_error = 0
-    for match in match_test:
-        y = match.won
-        homeTeam = match.home_team
-        awayTeam = match.away_team
-        homeTeamVariables, awayTeamVariables = create_variables(homeTeam, awayTeam, match)
-        y_est = calc_estimated_value(coefficients, homeTeamVariables, awayTeamVariables)
-        if y_est > 0.5:
-            y_est = 1
-        else:
-            y_est = 0
-        error = math.fabs(y_est - y)
-        tot_error = tot_error + error
-    avg_error = tot_error / len(match_test)
-
-    return avg_error
 
