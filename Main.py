@@ -16,25 +16,25 @@ team_coll, match_coll = Make_Objects.createTeamAndMatchObjects()
 player_coll = Make_Objects.createPlayerObjects(team_coll)
 Make_Objects.updateTeamsInMatch(match_coll, team_coll)
 
-algorithm="linear regression"
+algorithm="neural network"
 
 while True:
+    match_train,match_test=match_coll[:50],match_coll[:50]
     process=input("Use saved model? (Model="+algorithm+") ")
     if process=="yes" or process=="ja":
         if algorithm=="neural network":
             model = Saved_Data.open_model_neural_network()
         elif algorithm=="linear regression":
             model = Saved_Data.open_model_linear_regression()
-        match_train,match_test=Saved_Data.open_datasets()
+        # match_train,match_test=Saved_Data.open_datasets()
         print(model)
         break
     else:
         process=input("Are you sure you want to train the data? (Algorithm="+algorithm+") ")
         if process=="yes" or process=="ja":
             # match_train, match_test = Calculations.seperateData(match_coll, train=0.7, test=0.3)
-            match_train, match_test = sample(match_coll, 10) , sample(match_coll, 6056)
-
-            Saved_Data.save_datasets(match_train,match_test)
+            # match_train, match_test = sample(match_coll, 50) , sample(match_coll, 6056)
+            # Saved_Data.save_datasets(match_train,match_test)
 
             # set bounderies of all coefficients
             bounds = [(-100, 100), (-100, 100), (-100, 100), (-100, 100), (-100, 100), (-100, 100),
@@ -52,8 +52,8 @@ while True:
 Algorithm.plot_errors()
 
 #define how much procent the model predicts the right team to win.
-avg_err = Test.total_error(list(model.x), match_test, algorithm=algorithm)
-print(avg_err)
+avg_err,avg_correct_prediction = Test.total_error(list(model.x), match_test, algorithm=algorithm)
+print(avg_err,avg_correct_prediction)
 
 
 #define the likelihood a team will win given the result of the model

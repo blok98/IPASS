@@ -5,6 +5,7 @@ import Saved_Data
 import numpy as np
 import Test
 from matplotlib import pyplot
+from time import sleep
 
 global niggahlist
 niggahlist = []
@@ -32,7 +33,6 @@ def create_variables(homeTeam, awayTeam, match):
     x8 = (match.date-awayTeam.get_last_played_game(match.date)).days
     awayTeamVariables = [x1, x2, x3, x4, x5, x6, x7, x8]
 
-
     return homeTeamVariables, awayTeamVariables
 
 
@@ -47,6 +47,7 @@ def calc_linear_regression(coefficients, homeTeamVariables, awayTeamVariables):
 def calc_neural_network(coefficients,homeTeamVariables,awayTeamVariables):
     y_est = coefficients[0]
     coefficients=coefficients[:-1]
+    coefficients=coefficients[1:]
     homeTeamVariables=np.asarray(homeTeamVariables)
     awayTeamVariables=np.asarray(awayTeamVariables)
     variables=homeTeamVariables-awayTeamVariables
@@ -54,13 +55,17 @@ def calc_neural_network(coefficients,homeTeamVariables,awayTeamVariables):
     matrix1=variables
     matrix2=np.asarray(coefficients[:var_size*3]).reshape(3,var_size)
     matrix3=np.asarray(coefficients[-3:])
-    y_est=np.dot(np.dot(matrix3,matrix2),matrix1)
+    # print("matrixes gemaakt a.h.v. coefficienten:  (coefficienten with constante and variance=",coefficients)
+    # print("matrix3",matr)
+    y_est += np.dot(np.dot(matrix3,matrix2),matrix1)
     return y_est
+
 
 
 # Function total_log_likelihood berekent eerst alle errors zelf en daarna de som
 # van alle log_likelihoods van alle errors
 def total_log_likelihood(coefficients, match_coll, algorithm="linear regression"):
+
     total_log_likelihood = 0
     total_correct_predictions=0
     tot_error = 0
@@ -79,7 +84,7 @@ def total_log_likelihood(coefficients, match_coll, algorithm="linear regression"
             y_est = calc_neural_network(coefficients, homeTeamVariables, awayTeamVariables)
 
         error = y - y_est
-        correct_prediction=Test.correct_prediction(y_est,y)
+        correct_prediction=Test.calc_correct_prediction(y_est,y)
         total_correct_predictions+=correct_prediction
         printerror = math.fabs((y_est > 0.5) - y)   #if y_est is closer to 1, and y=0, than error=1. Vice versa
         tot_error += printerror
@@ -101,13 +106,14 @@ def total_log_likelihood(coefficients, match_coll, algorithm="linear regression"
 # Function log_likelihood berekent de kans van de normale verdeling dat je een
 # bepaalde error ziet van 1 observatie
 def calc_log_likelihood(error, variance):
+    variance = 1
     try:
         return -(1 / 2) * math.log(2 * math.pi * (variance),math.e) - (1 / 2) * ((error) ** 2) / (variance)
         # return - (1 / 2) * math.log(2 * math.pi , math.e) - (1/2) * math.log(variance, math.e) - ((error**2)/(2*variance))
     except Exception:
         print(variance,error)
         return -(1 / 2) * math.log(2 * math.pi * (variance), math.e) - (1 / 2) * ((error) ** 2) / (
-                    variance + 0.001)
+                    variance)
 
 
 

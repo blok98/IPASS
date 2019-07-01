@@ -3,7 +3,8 @@ import math
 
 #berekenen hoeveel procent van de observaties het model het tegenovergestelde voorspelt  (winnen inplaats van verlizen)
 def total_error(coefficients, match_test, algorithm="linear regression"):
-    tot_error = 0
+    tot_prediction = 0
+    tot_error=0
     for match in match_test:
         y = match.won
         homeTeam = match.home_team
@@ -15,20 +16,22 @@ def total_error(coefficients, match_test, algorithm="linear regression"):
             y_est = Algorithm.calc_neural_network(Algorithm.get_nn_coefficients(coefficients,hiddenlayer_size=3), homeTeamVariables, awayTeamVariables)
         else:
             print("Learn typing you freak")
-        error=correct_prediction(y_est,y)
-        tot_error = tot_error + error
-    avg_error = tot_error / len(match_test)
+        correct_prediction=calc_correct_prediction(y_est,y)
+        tot_prediction+=correct_prediction**2
+        error=error_y_y_est(y_est,y)
+        tot_error = tot_error + error**2
+    avg_error = "average y-y_est  "+str(tot_error / len(match_test))
+    avg_correct_prediction="amount of games predicted right  "+str(tot_prediction/len(match_test))
 
-    return avg_error
+    return avg_error,avg_correct_prediction
 
-def correct_prediction(y_est,y):
-    if y_est > 0.5:
-        y_est = 1
-    else:
-        y_est = 0
-    error = math.fabs(y_est - y)
+def calc_correct_prediction(y_est,y):
+    error=math.fabs((y_est > 0.5) - y)
     return error
 
+def error_y_y_est(y_est,y):
+    error = math.fabs(y - y_est)
+    return error
 
 def compete_with_bookmakers(match_test,coefficients,algorithm="linear regression"):
     capital=10000
