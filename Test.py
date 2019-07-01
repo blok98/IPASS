@@ -2,26 +2,35 @@ import Algorithm
 import math
 
 #berekenen hoeveel procent van de observaties het model het tegenovergestelde voorspelt  (winnen inplaats van verlizen)
-def total_error(coefficients, match_test):
+def total_error(coefficients, match_test, algorithm="linear regression"):
     tot_error = 0
     for match in match_test:
         y = match.won
         homeTeam = match.home_team
         awayTeam = match.away_team
         homeTeamVariables, awayTeamVariables = Algorithm.create_variables(homeTeam, awayTeam, match)
-        y_est = Algorithm.calc_estimated_value(coefficients, homeTeamVariables, awayTeamVariables)
-        if y_est > 0.5:
-            y_est = 1
+        if algorithm=="linear regression":
+            y_est = Algorithm.calc_linear_regression(coefficients, homeTeamVariables, awayTeamVariables)
+        elif algorithm=="neural network":
+            y_est = Algorithm.calc_neural_network(Algorithm.get_nn_coefficients(coefficients,hiddenlayer_size=3), homeTeamVariables, awayTeamVariables)
         else:
-            y_est = 0
-        error = math.fabs(y_est - y)
+            print("Learn typing you freak")
+        error=correct_prediction(y_est,y)
         tot_error = tot_error + error
     avg_error = tot_error / len(match_test)
 
     return avg_error
 
+def correct_prediction(y_est,y):
+    if y_est > 0.5:
+        y_est = 1
+    else:
+        y_est = 0
+    error = math.fabs(y_est - y)
+    return error
 
-def compete_with_bookmakers(match_test,coefficients):
+
+def compete_with_bookmakers(match_test,coefficients,algorithm="linear regression"):
     capital=10000
     for match in match_test:
         homeTeam = match.home_team
@@ -31,12 +40,15 @@ def compete_with_bookmakers(match_test,coefficients):
         constante = coefficients[0]
         variance = coefficients[-1]
 
-        y_est = constante
-        for i in range(1, len(coefficients) - 1):
-            y_est += (coefficients[i] * (homeTeamVariables[i - 1] - awayTeamVariables[i - 1]))
+        if algorithm=="linear regression":
+            y_est = Algorithm.calc_linear_regression(coefficients,homeTeamVariables,awayTeamVariables)
+        elif algorithm=="neural network":
+            y_est = Algorithm.calc_neural_network(Algorithm.get_nn_coefficients(coefficients,hiddenlayer_size=3),homeTeamVariables,awayTeamVariables)
+        else:
+            print("Your fingers are too thick to type")
 
         # nu bereken je de kans dat de error van verliezen voorkomt, en de kans dat de error van winnen voorkomt (gegeven een distribution)
-        estimated_odd=get_estimated_winning_odd(match,y_est,variance)
+        estimated_odd=get_estimated_winning_odd(y_est,variance)
 
         official_odd,official_return=get_official_bettingData(match)
 
@@ -44,7 +56,7 @@ def compete_with_bookmakers(match_test,coefficients):
 
     return capital
 
-def get_estimated_winning_odd(match,y_est,variance):
+def get_estimated_winning_odd(y_est,variance):
     error_winst = math.fabs(y_est - 1)
     error_verlies = math.fabs(y_est - 0)
     log_likelihood_winst = Algorithm.calc_log_likelihood(error_winst, variance)
@@ -71,4 +83,55 @@ def bet(match,capital,estimated_odd,official_odd,official_return,won):
                 capital += official_return * 100
 
     return capital
+
+
+
+
+def manually_testing(algorithm,coefficients,match_coll):
+    while True:
+        hometeam=input("hometeam: ")
+        awayteam=input("awayteam: ")
+        match=None
+        variable_names_hometeam = {"avg age":None, "avg height":None, "avg weight":None, "attacking rating":None, "midfield rating":None, "defending rating":None,
+        "goalkeeper rating":None, "amount of rest days":None}
+        variable_names_awayteam = {}
+        for i in match_coll:
+            if i.home_team.name==hometeam and i.away_team.name==awayteam:
+                match=i
+                homeTeamVariables,awayTeamVariables=Algorithm.create_variables(match.home_team,match.away_team,match)
+                index=0
+                for i in variable_names_hometeam:
+                    variable_names_hometeam[i]=homeTeamVariables[index]
+                    variable_names_awayteam[i]=awayTeamVariables[index]
+                    index+=1
+                break
+        if match==None:
+            print("couldn't find a match between "+hometeam+" and "+awayteam)
+            len_variables = 8
+            homeTeamVariables = []
+            awayTeamVariables = []
+            print("homeTeamVariables")
+            for i in range(len_variables):
+                homeTeamVariables.append(int(input("X"+str(i)+" ")))
+            print("awayTeamVariables")
+            for i in range(len_variables):
+                awayTeamVariables.append(int(input("X" + str(i) + " ")))
+
+        variables_input={}
+        for i in variable_names_hometeam:
+            variables_input[i]=round(variable_names_hometeam[i]-variable_names_awayteam[i],2)
+
+
+        if algorithm=="neural network":
+            y_est = Algorithm.calc_neural_network(Algorithm.get_nn_coefficients(coefficients,3),homeTeamVariables,awayTeamVariables)
+        elif algorithm=="linear regression":
+            y_est = Algorithm.calc_linear_regression(coefficients,homeTeamVariables,awayTeamVariables)
+
+        estimated_winning_odd=get_estimated_winning_odd(y_est,coefficients[-1])
+
+        print("home team variables are: ",variable_names_hometeam)
+        print("away team variables are: ",variable_names_awayteam)
+        print("input variables are: ",variables_input)
+        print("the output of "+algorithm+" is: ",y_est)
+        print("the predicted odd of the hometeam winning is: ",estimated_winning_odd)
 

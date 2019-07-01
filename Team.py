@@ -22,8 +22,8 @@ class Team:
         avg=0
         for player in self.players:
             avg+=player.age
-        avg=avg//len(self.players)
-        return avg
+        avg=avg/len(self.players)
+        return round(avg,2)
 
     def get_avg_overall(self):
         avg=0
