@@ -1,6 +1,8 @@
 from Algorithm import *
 
 class Test:
+    '''Test is an object which contains all analysis of an executed algorithm of object Algorithm, based on a given test dataset.
+         It shows the average error, how many per cent of the matches can be predicted correctly and how the model can make (or lose) money when using it to bet on bettingsides.'''
     algorithm=None
     coefficients=[]
     match_test=[]
@@ -19,6 +21,9 @@ class Test:
 
 
     def total_error(self):
+        '''This method calculates how accurate the established model is. It returns 2 things:
+           The average error between the estimated result and the official result.
+           And how many per cent of the games are predicted correctly by the algorithm.'''
         tot_prediction = 0
         tot_error = 0
         for match in self.match_test:
@@ -51,6 +56,9 @@ class Test:
 
 
     def compete_with_bookmakers(self):
+        '''This method calculates how much many you can make using the model to bet on games.
+           It compares the established odds from the algorithm with official odds of bookmakers.
+           When the established odds are predicting a team will win or lose better than the official odds, than it will bet on the 'winning' team.'''
         capital=10000
         for match in self.match_test:
             homeTeam = match.home_team
@@ -76,6 +84,8 @@ class Test:
         return capital
 
     def get_estimated_winning_odd(self,y_est,variance):
+        '''This method converts the outcome of the algorithm to a how much more likely the hometeam is to win.
+           Dividing the likelihood of winning by the likelihood of losing results in an odd for the hometeam. '''
         error_winst = math.fabs(y_est - 1)
         error_verlies = math.fabs(y_est - 0)
         log_likelihood_winst = self.algorithm.calc_log_likelihood(error_winst, variance)
@@ -86,6 +96,9 @@ class Test:
         return estimated_odd
 
     def get_official_bettingData(self,match):
+        '''This method returns the official odds and returns from official bookmakers.
+           The odds are calculated by dividing 1 by the return.
+           Bookmaker: 'bwin' '''
         official_return = match.oddsHomeTeam  # how much more money you get back if you win
         implied_win_probability = 1 / official_return
         implied_lose_probability = 1 - implied_win_probability
@@ -93,13 +106,15 @@ class Test:
         return official_odd,official_return
 
     def bet(self,capital,estimated_odd,official_odd,official_return,won):
-
-        # Check how much money can be made with the model: If the model predicts a higher change of winning: bet!
+        '''This method will bet based on official odds and the prediction odds.
+           If the predicted odd for the favorite team is higher than that of bookmakers, it will bet 100 euro's on the favorite team.
+           Starting capital=100'''
         if estimated_odd > 1:
-            if official_odd < estimated_odd:  # if estimated odd is higher than official, expect model is better.
+            if official_odd < estimated_odd:
                 capital -= 100
                 if won == 1:
                     capital += official_return * 100
+
 
         return capital
 
