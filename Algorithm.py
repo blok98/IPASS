@@ -55,9 +55,11 @@ def calc_neural_network(coefficients,homeTeamVariables,awayTeamVariables):
     matrix1=variables
     matrix2=np.asarray(coefficients[:var_size*3]).reshape(3,var_size)
     matrix3=np.asarray(coefficients[-3:])
-    # print("matrixes gemaakt a.h.v. coefficienten:  (coefficienten with constante and variance=",coefficients)
-    # print("matrix3",matr)
     y_est += np.dot(np.dot(matrix3,matrix2),matrix1)
+    # print("matrixes gemaakt a.h.v. coefficienten:  (coefficienten incl constante and variance=",coefficients)
+    # print("matrix1 ",matrix1)
+    # print("matrix2 ",matrix2)
+    # print("matrix3 ", matrix3)
     return y_est
 
 
@@ -83,21 +85,20 @@ def total_log_likelihood(coefficients, match_coll, algorithm="linear regression"
         elif algorithm=="neural network":
             y_est = calc_neural_network(coefficients, homeTeamVariables, awayTeamVariables)
 
-        error = y - y_est
+        error = math.fabs(y - y_est)
+        tot_error+=error
         correct_prediction=Test.calc_correct_prediction(y_est,y)
         total_correct_predictions+=correct_prediction
-        printerror = math.fabs((y_est > 0.5) - y)   #if y_est is closer to 1, and y=0, than error=1. Vice versa
-        tot_error += printerror
         # bereken de likelihood dat een observatie voorkomt
         log_likelihood = calc_log_likelihood(error, variance)
-        total_log_likelihood = total_log_likelihood + log_likelihood
+        total_log_likelihood += log_likelihood
 
 
     avg_error = tot_error / len(match_coll)
     niggahlist.append(total_correct_predictions/len(match_coll))
-
+    print("CREATED A NEW MODEL")
     print("totlikelihood", round(total_log_likelihood, 5), end=" ")
-    print(avg_error)
+    print("the everage y-y_est is: ",avg_error)
 
     return -total_log_likelihood
 
@@ -106,28 +107,29 @@ def total_log_likelihood(coefficients, match_coll, algorithm="linear regression"
 # Function log_likelihood berekent de kans van de normale verdeling dat je een
 # bepaalde error ziet van 1 observatie
 def calc_log_likelihood(error, variance):
-    variance = 1
+    variance = math.fabs(variance)
     try:
-        return -(1 / 2) * math.log(2 * math.pi * (variance),math.e) - (1 / 2) * ((error) ** 2) / (variance)
+        return -(1 / 2) * math.log(2 * math.pi * (variance), math.e) - (1 / 2) * ((error) ** 2) / (variance)
         # return - (1 / 2) * math.log(2 * math.pi , math.e) - (1/2) * math.log(variance, math.e) - ((error**2)/(2*variance))
     except Exception:
         print(variance,error)
-        return -(1 / 2) * math.log(2 * math.pi * (variance), math.e) - (1 / 2) * ((error) ** 2) / (
-                    variance)
+        return -(1 / 2) * math.log(2 * math.pi * (variance), math.e) - (1 / 2) * ((error) ** 2) / (variance+0.01)
 
 
 
 # # Minimaliseer je total_log_likelihood (of maximaliseer de kans dat je de
 # # gegeven errors ziet) door je coefficients te veranderen en
 # # sla de coefficients op die de laagste total_log_likelihood hebben
-def minimize_model(algorithm, matches, coefficient_initialization=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0], method='Nelder-Mead', bnds=[],
-             options={'gtol': 1e-3, 'eps': 100, 'disp': True}):
+def minimize_model(algorithm, matches, coefficient_initialization=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0], method='BFGS',
+             options={'maxiter':10000, 'xatol': 0.01, 'fatol': 0.01, 'adaptive': True}, tol=1):
 
     if algorithm=="neural network":
         coefficient_initialization=get_nn_coefficients(coefficient_initialization,hiddenlayer_size=3)
+        coefficient_initialization=[0.52911765,  0.07198612, -0.21088413,  0.3348742 , -0.02000785,
+        0.14179519,  0.00728426, -0.10021594,  0.0890723 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,  0.00659673 ]
 
     model = optimize.minimize(total_log_likelihood, coefficient_initialization, args=(matches,algorithm), method=method,
-                              bounds=bnds, options=options)
+                              tol=tol,options=options)
 
     # save model in text file
     saveIt=input("save model? ")

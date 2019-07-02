@@ -13,53 +13,70 @@ from matplotlib import pyplot
 
 #make list of objects Player,Team,Match
 team_coll, match_coll = Make_Objects.createTeamAndMatchObjects()
+
 player_coll = Make_Objects.createPlayerObjects(team_coll)
 Make_Objects.updateTeamsInMatch(match_coll, team_coll)
 
-algorithm="neural network"
-
-while True:
-    match_train,match_test=match_coll[:50],match_coll[:50]
-    process=input("Use saved model? (Model="+algorithm+") ")
-    if process=="yes" or process=="ja":
-        if algorithm=="neural network":
-            model = Saved_Data.open_model_neural_network()
-        elif algorithm=="linear regression":
-            model = Saved_Data.open_model_linear_regression()
-        # match_train,match_test=Saved_Data.open_datasets()
-        print(model)
-        break
-    else:
-        process=input("Are you sure you want to train the data? (Algorithm="+algorithm+") ")
-        if process=="yes" or process=="ja":
-            # match_train, match_test = Calculations.seperateData(match_coll, train=0.7, test=0.3)
-            # match_train, match_test = sample(match_coll, 50) , sample(match_coll, 6056)
-            # Saved_Data.save_datasets(match_train,match_test)
-
-            # set bounderies of all coefficients
-            bounds = [(-100, 100), (-100, 100), (-100, 100), (-100, 100), (-100, 100), (-100, 100),
-                      (-100, 100), (-100, 100), (0.15, 50)]
-
-            opt = {'gtol': 1e-1, 'eps': 100, 'disp': True}
-
-            # minimalize the function TOTAL_LOG_LIKELIHOOD with given coefficients. Method is Nelder-Mead which is good for uncertain functions
-            model = Algorithm.minimize_model(algorithm, match_train, coefficient_initialization=[0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 1],
-                                       method="Nelder-Mead", bnds=bounds, options=opt)
-            print(model)
-            break
-
-
-Algorithm.plot_errors()
-
-#define how much procent the model predicts the right team to win.
-avg_err,avg_correct_prediction = Test.total_error(list(model.x), match_test, algorithm=algorithm)
-print(avg_err,avg_correct_prediction)
-
-
-#define the likelihood a team will win given the result of the model
-capital=Test.compete_with_bookmakers(match_test, list(model.x), algorithm=algorithm)
-print(capital)
-
-
-Test.manually_testing(algorithm,list(model.x),match_coll)
-
+#
+#
+# algorithm="neural network"
+#
+# variables=Algorithm.create_variables(match_coll[0].home_team,match_coll[0].away_team,match_coll[0])
+# y_est_nn = Algorithm.calc_neural_network([0.52911765,  0.07198612, -0.21088413,  0.3348742 , -0.02000785,
+#         0.14179519,  0.00728426, -0.10021594,  0.0890723 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,  0.00659673],variables[0],variables[1])
+# y_est_ln = Algorithm.calc_linear_regression([0.52911765,  0.07198612, -0.21088413,  0.3348742 , -0.02000785,
+#         0.14179519,  0.00728426, -0.10021594,  0.0890723 ,0.00659673],variables[0],variables[1])
+#
+# print(y_est_nn)
+# print(y_est_ln)
+#
+# while True:
+#     match_train,match_test=match_coll[:10],match_coll[:10]
+#     process=input("Use saved model? (Model="+algorithm+") ")
+#     if process=="yes" or process=="ja":
+#         if algorithm=="neural network":
+#             model = Saved_Data.open_model_neural_network()
+#         elif algorithm=="linear regression":
+#             model = Saved_Data.open_model_linear_regression()
+#         # match_train,match_test=Saved_Data.open_datasets()
+#         print(model)
+#         break
+#     else:
+#         process=input("Are you sure you want to train the data? (Algorithm="+algorithm+") ")
+#         if process=="yes" or process=="ja":
+#             # match_train, match_test = Calculations.seperateData(match_coll, train=0.7, test=0.3)
+#             # match_train, match_test = sample(match_coll, 50) , sample(match_coll, 6056)
+#             # Saved_Data.save_datasets(match_train,match_test)
+#
+#             # set bounderies of all coefficients
+#             bounds = [(-100, 100), (-100, 100), (-100, 100), (-100, 100), (-100, 100), (-100, 100),
+#                       (-100, 100), (-100, 100), (0.15, 50)]
+#             bounds2 = [(-100, 100), (-100, 100), (-100, 100), (-100, 100), (-100, 100), (-100, 100),
+#                       (-100, 100), (-100, 100), (-100, 100), (-100, 100), (-100, 100), (-100, 100),
+#                       (-100, 100), (-100, 100), (-100, 100), (-100, 100),(-100, 100), (-100, 100),
+#                       (-100, 100), (-100, 100), (-100, 100), (-100, 100), (-100, 100), (-100, 100),
+#                       (-100, 100), (-100, 100), (-100, 100), (-100, 100),(0.15, 50)]
+#
+#             opt = {'maxiter':10000, 'xatol': 0.1, 'fatol': 0.01, 'adaptive': True}
+#
+#             # minimalize the function TOTAL_LOG_LIKELIHOOD with given coefficients. Method is Nelder-Mead which is good for uncertain functions
+#             model = Algorithm.minimize_model(algorithm, match_train, coefficient_initialization=[0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 1],
+#                                        method='Nelder-Mead', options=opt, tol=1000)
+#             print(model)
+#             break
+#
+#
+# Algorithm.plot_errors()
+#
+# #define how much procent the model predicts the right team to win.
+# avg_err,avg_correct_prediction = Test.total_error(list(model.x), match_test, algorithm=algorithm)
+# print(avg_err,avg_correct_prediction)
+#
+#
+# #define the likelihood a team will win given the result of the model
+# capital=Test.compete_with_bookmakers(match_test, list(model.x), algorithm=algorithm)
+# print(capital)
+#
+#
+# Test.manually_testing(algorithm,list(model.x),match_coll)
+#

@@ -21,7 +21,7 @@ def total_error(coefficients, match_test, algorithm="linear regression"):
         error=error_y_y_est(y_est,y)
         tot_error = tot_error + error**2
     avg_error = "average y-y_est  "+str(tot_error / len(match_test))
-    avg_correct_prediction="amount of games predicted right  "+str(tot_prediction/len(match_test))
+    avg_correct_prediction="amount of games predicted right  "+str(1-(tot_prediction/len(match_test)))
 
     return avg_error,avg_correct_prediction
 

@@ -74,6 +74,7 @@ def createPlayerObjects(team_coll):
 
 #first check if team excist in team_coll (and thus also in match_data), than add players to that team.
 def addPlayerToTeam(team_coll,team_name,player):
+    print("team_coll",team_coll)
     for i in range(len(team_coll)):
         team = team_coll[i]
         if team.name == team_name:
