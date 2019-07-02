@@ -4,6 +4,7 @@ pickle
 numpy
 scipy
 matplotlib.pyplot
+datetime
 
 verander in de main the path waarin de bestanden staan.
 
