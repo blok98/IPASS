@@ -30,11 +30,6 @@ T2=Test(N1,match_coll[:100])
 N1.load("N1")
 T1.load("T1")
 
-L1.plot_errors()
-print(T1.avg_error,T1.avg_correct_prediction)
-N1.plot_errors()
-print(T2.avg_error,T2.avg_correct_prediction)
-print(T1.capital,T2.capital)
 
 
 
