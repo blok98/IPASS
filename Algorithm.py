@@ -8,7 +8,7 @@ class Algorithm:
     '''All algorithms which belong to 'Algorithm' build a model which predicts the outcome of matchresults.
        The prediction is based on the likelihood of the occurrence of the error between the outcomes of the model and the official result of matches.'''
     method='Nelder-Mead'
-    opt = {'maxiter': 10000, 'xatol': 0.1, 'fatol': 0.01, 'adaptive': True}
+    opt = {'maxiter': 10000, 'adaptive': False}
     model = None
     avg_error_timeline=[]
 
@@ -98,8 +98,8 @@ class Neural_network(Algorithm):
        This algorithm assumes there is no direct relation between variables and the outcome.'''
 
     match_train=[]
-    coefficients=[0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 1]
-    tol = 1000000
+    coefficients=[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1, 1]
+    tol = 1e-1
 
     def __init__(self,match_train):
         self.match_train=match_train
@@ -112,9 +112,8 @@ class Neural_network(Algorithm):
         from_hidden_layer_to_output = [0.1] * hiddenlayer_size
         return [self.coefficients[0]] + from_variables_to_hidden_layer + from_hidden_layer_to_output + [self.coefficients[-1]]
 
-    def calc_neural_network(self, homeTeamVariables, awayTeamVariables):
+    def calc_neural_network(self, coefficients, homeTeamVariables, awayTeamVariables):
         '''This method converts coefficients to coefficients in matrixes, which are part of the Neural Network with one hidden layer of size: 3.'''
-        coefficients=self.coefficients
         y_est = coefficients[0]
         coefficients = coefficients[:-1]
         homeTeamVariables = np.asarray(homeTeamVariables)
@@ -157,14 +156,13 @@ class Neural_network(Algorithm):
 
             variance = coefficients[-1]
 
-            y_est = self.calc_neural_network(homeTeamVariables,awayTeamVariables)
+            y_est = self.calc_neural_network(coefficients,homeTeamVariables,awayTeamVariables)
 
-            error = y - y_est
+            error = math.fabs(y - y_est)
             log_likelihood = self.calc_log_likelihood(error, variance)
             total_log_likelihood = total_log_likelihood + log_likelihood
 
             tot_error += error
-
 
         avg_error = tot_error / len(match_test)
         self.avg_error_timeline.append(avg_error)
@@ -186,7 +184,7 @@ class Linear_regression(Algorithm):
     '''
     match_train=[]
     coefficients=[0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 1]
-    tol = 1000
+    tol = 1e-1
 
     def __init__(self,match_train):
         self.match_train=match_train
@@ -207,7 +205,6 @@ class Linear_regression(Algorithm):
            While doing that it keeps score of the average error of each improved model. '''
         self.avg_error_timeline=[]
         coefficient_initialization = self.coefficients
-
         model = optimize.minimize(self.total_log_likelihood, coefficient_initialization, args=(self.match_train),
                                   method=self.method,options=self.opt,tol=self.tol)
         self.model = model
@@ -233,7 +230,7 @@ class Linear_regression(Algorithm):
 
             y_est = self.calc_linear_regression(coefficients, homeTeamVariables, awayTeamVariables)
 
-            error = y - y_est
+            error = math.fabs(y - y_est)
             log_likelihood = self.calc_log_likelihood(error, variance)
             total_log_likelihood = total_log_likelihood + log_likelihood
 

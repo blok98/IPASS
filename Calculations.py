@@ -20,6 +20,8 @@ class Calculations:
         return round(weight_in_kg, 2)
 
     def seperateData(self,match_coll, train=0.7, test=0.3):
+        '''This function defines Train data and Test data, where the datasets are disjoint.
+           70% will be train data and 30% will be test data'''
         match_train = sample(match_coll, int(0.7 * len(match_coll)))
         match_test = [match for match in match_coll if match not in match_train]
         return match_train, match_test

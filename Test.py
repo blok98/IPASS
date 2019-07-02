@@ -34,7 +34,7 @@ class Test:
             if type(self.algorithm) == Linear_regression:
                 y_est = self.algorithm.calc_linear_regression(self.coefficients, homeTeamVariables, awayTeamVariables)
             elif type(self.algorithm) == Neural_network:
-                y_est = self.algorithm.calc_neural_network(homeTeamVariables, awayTeamVariables)
+                y_est = self.algorithm.calc_neural_network(self.coefficients,homeTeamVariables, awayTeamVariables)
 
 
             correct_prediction = self.calc_correct_prediction(y_est, y)
@@ -71,7 +71,7 @@ class Test:
             if type(self.algorithm)==Linear_regression:
                 y_est = self.algorithm.calc_linear_regression(self.coefficients,homeTeamVariables,awayTeamVariables)
             elif type(self.algorithm)==Neural_network:
-                y_est = self.algorithm.calc_neural_network(homeTeamVariables,awayTeamVariables)
+                y_est = self.algorithm.calc_neural_network(self.coefficients,homeTeamVariables,awayTeamVariables)
 
 
             # nu bereken je de kans dat de error van verliezen voorkomt, en de kans dat de error van winnen voorkomt (gegeven een distribution)
@@ -114,8 +114,6 @@ class Test:
                 capital -= 100
                 if won == 1:
                     capital += official_return * 100
-
-
         return capital
 
     def save(self, name):

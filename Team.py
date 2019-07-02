@@ -1,4 +1,6 @@
 class Team:
+    '''This object is a team which is present in 'All_data'.
+       All players that are part of the team are summarised in a list with 'Player' objects.'''
     name = "None"
     players = []
     matchDates=[]
@@ -11,10 +13,13 @@ class Team:
         self.players.append(player)
 
     def set_match_dates(self,list_dates):
+        '''This method defines all match dates the team has played. The list will be sorted chronically.'''
         list_dates.sort()
         self.matchDates=list_dates
 
     def get_last_played_game(self,date):
+        '''This method returns the last date the team has played.
+           In the sorted list 'matchDates' the element before the element of the given date will be returned.'''
         dateLastPlayed=self.matchDates[self.matchDates.index(date)-1]
         return dateLastPlayed
 
@@ -53,6 +58,7 @@ class Team:
         return round(avg,2)
 
     def get_avg_positionRating(self):
+        '''This method returns a dictionary of positions with their key as the average fifa rating at these positions.'''
         overalls={"attacker":[],"midfielder":[],"defender":[],"goalkeeper":[]}
         for player in self.players:
             if player.position=="attacker":
