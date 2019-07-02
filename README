@@ -1,0 +1,23 @@
+installeer de volgende modules
+
+pickle
+numpy
+scipy
+matplotlib.pyplot
+
+verander in de main the path waarin de bestanden staan.
+
+
+Maak in Main eerst een object van Linear_Regression of Neural_Network.(l1=Linear_Regression(match_coll)) Gebruik als parameter de match_train lijst. Dit is 70 procent van alle wedstrijden. Wil je een kleinere dataset gebruiken, doe dan match_train[:xx].
+Als je het algoritme wil trainen, voer de methoden .minimize_model uit.
+Als je het algoritme dat getraind is op 70% van de data wil laden, voer dan de methode .load("N1") voor Neural Network of methode .load("L1") voor Linear Regression uit.
+Als je het algoritme wil testen, maak dan een Test object aan voor het algoritme. Gebruik als parameter de test dataset match_test. (t1=Test(Alglorithm,match_test))
+Als je een test object wil laden die de algoritmen "N1" en "L1" testen, doe dan: t1=Test.load("T1")
+
+methoden Algoritmen:
+.plot_errors, dit plot de gemiddelde errors die uit elk model zijn gekomen tijdens het trainen van het algoritme.
+
+methoden Test:
+.total_error, returnt 2 waarden: de gemiddelde error over de test data en de kans op het voorspellen van de juiste uitslag
+.compete_with_bookmakers, nu wordt er met een startbedrag van 10000 gewed a.h.v. het model. De return is het overig kapitaal
+
