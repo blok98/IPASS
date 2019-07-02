@@ -22,3 +22,4 @@ methoden Test:
 .total_error, returnt 2 waarden: de gemiddelde error over de test data en de kans op het voorspellen van de juiste uitslag
 .compete_with_bookmakers, nu wordt er met een startbedrag van 10000 gewed a.h.v. het model. De return is het overig kapitaal
 
+In Main worden automatisch de algoritmen en de test objecten geladen. Deze zijn getraind en getest op alle data.
